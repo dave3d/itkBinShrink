@@ -13,9 +13,9 @@ file( READ "${MY_CURENT_DIR}/README" DOCUMENTATION )
 itk_module(ITKBinShrink
   DEPENDS
     ITKCommon
+    ITKImageGrid
   TEST_DEPENDS
     ITKTestKernel
-    ITKMetaIO
   DESCRIPTION
     "${DOCUMENTATION}"
 )

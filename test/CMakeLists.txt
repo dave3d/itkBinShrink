@@ -4,10 +4,10 @@ itk_module_test()
 #changed when this module is renamed.
 
 set(ITK${itk-module}Tests
-  itkEmptyTest.cxx
+  itkBinShrinkImageFilterTest.cxx
 )
 
 CreateTestDriver(${itk-module}  "${${itk-module}-Test_LIBRARIES}" "${ITK${itk-module}Tests}")
 
-itk_add_test(NAME itkDeleteMeEmptyTest
-  COMMAND ${itk-module}TestDriver itkEmptyTest "argument1" "..." )
+itk_add_test(NAME itkBinShrinkImageFilterTest 
+  COMMAND ${itk-module}TestDriver  itkBinShrinkImageFilterTest )
