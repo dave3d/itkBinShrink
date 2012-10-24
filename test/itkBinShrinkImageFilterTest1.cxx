@@ -9,7 +9,7 @@
 #include "itkImageRegionConstIteratorWithIndex.h"
 
 
-int itkBinShrinkImageFilterTest( int argc, char *argv[] )
+int itkBinShrinkImageFilterTest1( int argc, char *argv[] )
 {
 
    // typedefs to simplify the syntax
