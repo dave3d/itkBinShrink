@@ -16,6 +16,7 @@ itk_module(ITKBinShrink
     ITKImageGrid
   TEST_DEPENDS
     ITKTestKernel
+    ITKImageSources
   DESCRIPTION
     "${DOCUMENTATION}"
 )

@@ -1,15 +1,29 @@
-#if defined(_MSC_VER)
-#pragma warning ( disable : 4786 )
-#endif
+/*=========================================================================
+ *
+ *  Copyright Bradley Lowekamp
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0.txt
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *=========================================================================*/
 
-#include "itkBinShrinkImageFilter.h"
+#include "itkBinShrinkImageFilter2.h"
 #include "itkShrinkImageFilter.h"
 #include "itkPipelineMonitorImageFilter.h"
 #include "itkImageRegionIteratorWithIndex.h"
 #include "itkImageRegionConstIteratorWithIndex.h"
 
 
-int itkBinShrinkImageFilterTest1( int , char *[] )
+int itkBinShrinkImageFilter2Test1( int argc, char *argv[] )
 {
 
    // typedefs to simplify the syntax
@@ -42,8 +56,8 @@ int itkBinShrinkImageFilterTest1( int , char *[] )
   MonitorFilter::Pointer monitor1 = MonitorFilter::New();
   monitor1->SetInput( sourceImage );
 
-  itk::BinShrinkImageFilter< ImageType, ImageType >::Pointer bin;
-  bin = itk::BinShrinkImageFilter< ImageType, ImageType >::New();
+  itk::BinShrinkImageFilter2< ImageType, ImageType >::Pointer bin;
+  bin = itk::BinShrinkImageFilter2< ImageType, ImageType >::New();
   bin->SetInput( monitor1->GetOutput() );
 
   MonitorFilter::Pointer monitor2 = MonitorFilter::New();
