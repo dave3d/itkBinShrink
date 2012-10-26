@@ -68,7 +68,7 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
   typedef ConstShapedNeighborhoodIterator< TInputImage > ConstNeighborhoodIteratorType;
   typename ConstNeighborhoodIteratorType::RadiusType radius;
   typedef typename ConstNeighborhoodIteratorType::RadiusType::SizeValueType RadiusValueType;
-  for (unsigned int i=0; i < TInputImage::ImageDimension; i++)
+  for (unsigned int i=0; i < TInputImage::ImageDimension; ++i)
     {
     radius[i] = Math::Ceil<RadiusValueType>( this->GetShrinkFactors()[i]*0.5 - 0.5);
     }
@@ -80,7 +80,7 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
   // Set up shaped neighbor hood by defining the offsets
   OutputOffsetType negativeOffset, positiveOffset, iOffset;
   typedef typename OutputOffsetType::OffsetValueType OffsetValueType;
-  for ( unsigned int i=0; i < TInputImage::ImageDimension; i++)
+  for ( unsigned int i=0; i < TInputImage::ImageDimension; ++i)
     {
     negativeOffset[i] = -Math::Ceil<OffsetValueType>( this->GetShrinkFactors()[i]*0.5 - 0.5);
     positiveOffset[i] =  Math::Floor<OffsetValueType>( this->GetShrinkFactors()[i]*0.5 - 0.5);
@@ -93,7 +93,7 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
 
     ++iOffset[0];
 
-    for (unsigned int i=0; i < TInputImage::ImageDimension - 1; i++)
+    for (unsigned int i=0; i < TInputImage::ImageDimension - 1; ++i)
       {
       if (iOffset[i] > positiveOffset[i])
         {
@@ -106,7 +106,7 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
 
   // convert the shrink factor for convenient multiplication
   typename TOutputImage::SizeType  factorSize;
-  for (unsigned int i=0; i < TInputImage::ImageDimension; i++)
+  for (unsigned int i=0; i < TInputImage::ImageDimension; ++i)
     {
     factorSize[i] = this->GetShrinkFactors()[i];
     }
@@ -114,7 +114,7 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
 
   bool degeneratelySmall = false;
   const typename TInputImage::SizeType &inputSize = inputPtr->GetLargestPossibleRegion().GetSize();
-  for (unsigned int i=0; i < TInputImage::ImageDimension; i++)
+  for (unsigned int i=0; i < TInputImage::ImageDimension; ++i)
     {
     // the interator neighborhood will fit unless the image was
     // degenerately small, ie the followign is true
@@ -199,7 +199,6 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
   // Compute the input requested region (size and start index)
   // Use the image transformations to insure an input requested region
   // that will provide the proper range
-  unsigned int i;
   const typename TOutputImage::SizeType& outputRequestedRegionSize
     = outputPtr->GetRequestedRegion().GetSize();
   const typename TOutputImage::IndexType& outputRequestedRegionStartIndex
@@ -211,7 +210,7 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
 
   // convert the shrink factor for convenient multiplication
   typename TOutputImage::SizeType  factorSize;
-  for (unsigned int i=0; i < TInputImage::ImageDimension; i++)
+  for (unsigned int i=0; i < TInputImage::ImageDimension; ++i)
     {
     factorSize[i] = this->GetShrinkFactors()[i];
     }
@@ -221,13 +220,13 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
 
   typename TInputImage::OffsetType negativeOffset, positiveOffset;
   typedef typename TInputImage::OffsetType::OffsetValueType OffsetValueType;
-  for ( i=0; i < TInputImage::ImageDimension; i++)
+  for ( unsigned int i=0; i < TInputImage::ImageDimension; ++i)
     {
     negativeOffset[i] = -Math::Ceil<OffsetValueType>( this->GetShrinkFactors()[i]*0.5 - 0.5);
     positiveOffset[i] =  Math::Floor<OffsetValueType>( this->GetShrinkFactors()[i]*0.5 - 0.5);
     }
 
-  for ( i=0; i < TInputImage::ImageDimension; i++)
+  for ( unsigned int i=0; i < TInputImage::ImageDimension; ++i)
     {
     inputIndex0[i] = outputRequestedRegionStartIndex[i]*factorSize[i] + offsetIndex[i] + negativeOffset[i];
     inputIndex1[i] = (outputRequestedRegionStartIndex[i]+outputRequestedRegionSize[i]-1)*factorSize[i] + offsetIndex[i] + positiveOffset[i];
@@ -280,7 +279,7 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
   // Given that the size is scaled by a constant factor eq:
   // inputIndex = outputIndex * factorSize
   // is equivalent up to a fixed offset which we now compute
-  for ( unsigned int i=0; i < TInputImage::ImageDimension; i++ )
+  for ( unsigned int i=0; i < TInputImage::ImageDimension; ++i )
     {
     offsetIndex[i] = inputIndex[i] - outputIndex[i]*this->GetShrinkFactors()[i];
     }
