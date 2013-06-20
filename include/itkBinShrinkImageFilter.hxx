@@ -129,10 +129,6 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
   OutputIteratorType     outputIterator(outputPtr, outputRegionForThread);
 
 
-  // allocate acumulate line
-  const size_t ln =  outputRegionForThread.GetSize(0);
-  AccumulatePixelType *accBuffer = 0;
-  accBuffer = new AccumulatePixelType[ln];
 
 
   // Set up shaped neighbor hood by defining the offsets
@@ -163,77 +159,91 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
     }
 
 
+  // allocate acumulate line
+  const size_t ln =  outputRegionForThread.GetSize(0);
+  AccumulatePixelType *accBuffer = 0;
+  accBuffer = new AccumulatePixelType[ln];
 
-  // convert the shrink factor for convenient multiplication
-  typename TOutputImage::SizeType  factorSize;
-  for (unsigned int i=0; i < TInputImage::ImageDimension; ++i)
+  try
     {
-    factorSize[i] = this->GetShrinkFactors()[i];
-    }
-
-  const size_t numSamples = std::accumulate( this->GetShrinkFactors().Begin(), this->GetShrinkFactors().End(), 1u, std::multiplies<size_t>() );
-  const double inumSamples = 1.0 / (double)numSamples;
-
-  const unsigned int numberOfLinesToProcess = outputRegionForThread.GetNumberOfPixels() / outputRegionForThread.GetSize(0);
-  ProgressReporter   progress(this, threadId, numberOfLinesToProcess );
-
-  while ( !outputIterator.IsAtEnd() )
-    {
-    const OutputIndexType outputIndex = outputIterator.GetIndex();
-
-    typename std::vector<OutputOffsetType>::const_iterator offset = offsets.begin();
-    const InputIndexType startInputIndex = outputIndex * factorSize;
-
-    inputIterator.SetIndex( startInputIndex+*offset );
-    for( size_t i = 0; i < ln; ++i )
+    // convert the shrink factor for convenient multiplication
+    typename TOutputImage::SizeType  factorSize;
+    for (unsigned int i=0; i < TInputImage::ImageDimension; ++i)
       {
-      accBuffer[i] = inputIterator.Get();
-      ++inputIterator;
-
-      for (size_t j = 1; j < factorSize[0]; ++j)
-        {
-        assert( !inputIterator.IsAtEndOfLine() );
-        accBuffer[i] += inputIterator.Get();
-        ++inputIterator;
-        }
+      factorSize[i] = this->GetShrinkFactors()[i];
       }
 
-    while ( ++offset != offsets.end() )
+    const size_t numSamples = std::accumulate( this->GetShrinkFactors().Begin(), this->GetShrinkFactors().End(), 1u, std::multiplies<size_t>() );
+    const double inumSamples = 1.0 / (double)numSamples;
+
+    const unsigned int numberOfLinesToProcess = outputRegionForThread.GetNumberOfPixels() / outputRegionForThread.GetSize(0);
+    ProgressReporter   progress(this, threadId, numberOfLinesToProcess );
+
+    while ( !outputIterator.IsAtEnd() )
       {
+      const OutputIndexType outputIndex = outputIterator.GetIndex();
+
+      typename std::vector<OutputOffsetType>::const_iterator offset = offsets.begin();
+      const InputIndexType startInputIndex = outputIndex * factorSize;
+
       inputIterator.SetIndex( startInputIndex+*offset );
-      // Note: If the output image is small then we might not split
-      // the fastest direction. So we may not actually be at the start
-      // of the line...
-      //inputIterator.GoToBeginOfLine();
-
-
       for( size_t i = 0; i < ln; ++i )
         {
-        for( size_t j = 0; j < factorSize[0]; ++j)
+        accBuffer[i] = inputIterator.Get();
+        ++inputIterator;
+
+        for (size_t j = 1; j < factorSize[0]; ++j)
           {
           assert( !inputIterator.IsAtEndOfLine() );
           accBuffer[i] += inputIterator.Get();
           ++inputIterator;
           }
         }
+
+      while ( ++offset != offsets.end() )
+        {
+        inputIterator.SetIndex( startInputIndex+*offset );
+        // Note: If the output image is small then we might not split
+        // the fastest direction. So we may not actually be at the start
+        // of the line...
+        //inputIterator.GoToBeginOfLine();
+
+
+        for( size_t i = 0; i < ln; ++i )
+          {
+          for( size_t j = 0; j < factorSize[0]; ++j)
+            {
+            assert( !inputIterator.IsAtEndOfLine() );
+            accBuffer[i] += inputIterator.Get();
+            ++inputIterator;
+            }
+          }
+        }
+
+      for ( size_t j = 0; j <ln;++j)
+        {
+        assert(!outputIterator.IsAtEndOfLine());
+        // this statement is made to work with RGB pixel types
+        accBuffer[j] = accBuffer[j] * inumSamples;
+
+        outputIterator.Set( static_cast<OutputPixelType>(accBuffer[j]) );
+        ++outputIterator;
+        }
+
+      outputIterator.NextLine();
+
+      // Although the method name is CompletedPixel(),
+      // this is being called after each line is processed
+      progress.CompletedPixel();
       }
 
-    for ( size_t j = 0; j <ln;++j)
-      {
-      assert(!outputIterator.IsAtEndOfLine());
-      // this statement is made to work with RGB pixel types
-      accBuffer[j] = accBuffer[j] * inumSamples;
-
-      outputIterator.Set( static_cast<OutputPixelType>(accBuffer[j]) );
-      ++outputIterator;
-      }
-
-    outputIterator.NextLine();
-
-    // Although the method name is CompletedPixel(),
-    // this is being called after each line is processed
-    progress.CompletedPixel();
     }
+  catch(..)
+    {
+    delete accBuffer;
+    throw;
+    }
+  delete accBuffer;
 
 }
 
