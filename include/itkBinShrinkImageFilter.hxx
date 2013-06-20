@@ -238,7 +238,7 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
       }
 
     }
-  catch(..)
+  catch(...)
     {
     delete accBuffer;
     throw;
