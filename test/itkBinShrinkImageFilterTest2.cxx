@@ -77,24 +77,26 @@ int itkBinShrinkImageFilterTest2( int , char *[] )
   source->SetSize( size );
 
   float origin[] = {1.1, 2.22};
-//  source->SetOrigin( origin );
+  source->SetOrigin( origin );
 
   unsigned int factors[] = {1,1};
   bool pass = true;
 
-  for( unsigned int xf = 1; xf < 3; ++xf )
+  for( unsigned int xf = 1; xf < 5; ++xf )
     {
     factors[0] = xf;
-    for( unsigned int yf = 1; yf < 3; ++yf )
+    for( unsigned int yf = 1; yf < 5; ++yf )
       {
       factors[1] = yf;
 
+    std::cout << "Testing with shrink factors:" << xf << " " << yf << std::endl;
 
       typedef itk::BinShrinkImageFilter<ImageType, ImageType> FilterType;
       FilterType::Pointer shrink = FilterType::New();
 
       shrink->SetInput(source->GetOutput());
 
+      std::cout << "Testing with shrink factors:" << xf << " " << yf << std::endl;
       shrink->SetShrinkFactors( factors );
       shrink->UpdateLargestPossibleRegion();
       if ( !CheckValueIsPhysicalPoint( shrink->GetOutput() ) )

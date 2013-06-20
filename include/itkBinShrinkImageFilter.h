@@ -54,12 +54,12 @@ namespace itk
  */
 template <class TInputImage, class TOutputImage>
 class ITK_EXPORT BinShrinkImageFilter:
-    public ShrinkImageFilter<TInputImage,TOutputImage>
+    public ImageToImageFilter<TInputImage,TOutputImage>
 {
 public:
   /** Standard class typedefs. */
   typedef BinShrinkImageFilter                          Self;
-  typedef ShrinkImageFilter<TInputImage,TOutputImage>   Superclass;
+  typedef ImageToImageFilter<TInputImage,TOutputImage>   Superclass;
   typedef SmartPointer<Self>                            Pointer;
   typedef SmartPointer<const Self>                      ConstPointer;
 
@@ -76,18 +76,32 @@ public:
   typedef typename InputImageType::Pointer            InputImagePointer;
   typedef typename InputImageType::ConstPointer       InputImageConstPointer;
 
+  typedef typename TOutputImage::OffsetType           OutputOffsetType;
   typedef typename TOutputImage::IndexType            OutputIndexType;
   typedef typename TInputImage::IndexType             InputIndexType;
-  typedef typename TOutputImage::OffsetType           OutputOffsetType;
 
   /** Typedef to describe the output image region type. */
   typedef typename TOutputImage::RegionType OutputImageRegionType;
+
 
   /** ImageDimension enumeration. */
   itkStaticConstMacro(ImageDimension, unsigned int,
                       TInputImage::ImageDimension );
   itkStaticConstMacro(OutputImageDimension, unsigned int,
                       TOutputImage::ImageDimension );
+
+  typedef FixedArray< unsigned int, ImageDimension > ShrinkFactorsType;
+
+  /** Set the shrink factors. Values are clamped to
+   * a minimum value of 1. Default is 1 for all dimensions. */
+  itkSetMacro(ShrinkFactors, ShrinkFactorsType);
+  void SetShrinkFactors(unsigned int factor);
+  void SetShrinkFactor(unsigned int i, unsigned int factor);
+
+  /** Get the shrink factors. */
+  itkGetConstReferenceMacro(ShrinkFactors, ShrinkFactorsType);
+
+  virtual void GenerateOutputInformation();
 
   /** BinShrinkImageFilter needs a larger input requested region than the output
    * requested region.  As such, BinShrinkImageFilter needs to provide an
@@ -108,7 +122,7 @@ public:
 
 protected:
   BinShrinkImageFilter();
-  ~BinShrinkImageFilter() {};
+  void PrintSelf(std::ostream & os, Indent indent) const;
 
   /** BinShrinkImageFilter can be implemented as a multithreaded filter.
    * Therefore, this implementation provides a ThreadedGenerateData() routine
@@ -127,7 +141,8 @@ private:
   BinShrinkImageFilter(const Self&); //purposely not implemented
   void operator=(const Self&); //purposely not implemented
 
-  OutputOffsetType ComputeOffsetIndex(void);
+  ShrinkFactorsType m_ShrinkFactors;
+
 };
 
 } // end namespace itk

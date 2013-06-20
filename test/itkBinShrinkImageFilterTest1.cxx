@@ -28,14 +28,14 @@ int itkBinShrinkImageFilterTest1( int , char *[] )
   sourceImage->SetRegions( region );
   sourceImage->Allocate();
 
-
+  {
   itk::ImageRegionIteratorWithIndex<ImageType> outIt(sourceImage, region);
   for ( outIt.GoToBegin(); !outIt.IsAtEnd(); ++outIt )
     {
     // we multiply by ten so for more precision
     outIt.Set( outIt.GetIndex()[0]*10 );
     }
-
+  }
 
 
   // assemple pipeline
@@ -45,6 +45,7 @@ int itkBinShrinkImageFilterTest1( int , char *[] )
   itk::BinShrinkImageFilter< ImageType, ImageType >::Pointer bin;
   bin = itk::BinShrinkImageFilter< ImageType, ImageType >::New();
   bin->SetInput( monitor1->GetOutput() );
+
 
   MonitorFilter::Pointer monitor2 = MonitorFilter::New();
   monitor2->SetInput(bin->GetOutput());
@@ -77,7 +78,6 @@ int itkBinShrinkImageFilterTest1( int , char *[] )
     failed = true;
     }
 
-
   try
     {
     // update with 2,1 shrink factor
@@ -102,7 +102,6 @@ int itkBinShrinkImageFilterTest1( int , char *[] )
     std::cout << "Excpetion: " << e << std::endl;
     failed = true;
     }
-
 
   try
     {
@@ -143,9 +142,7 @@ int itkBinShrinkImageFilterTest1( int , char *[] )
     itk::ImageRegionConstIteratorWithIndex<ImageType> inIt( monitor2->GetOutput(), monitor2->GetOutput()->GetLargestPossibleRegion() );
     for (inIt.GoToBegin(); !inIt.IsAtEnd(); ++inIt)
       {
-      // the +3 here is because the first columm and last colums are
-      // not in the average
-      if (inIt.Get() != (inIt.GetIndex()[0]*factors[0]+3)*10 )
+      if (inIt.Get() != (inIt.GetIndex()[0]*factors[0]+2)*10)
         {
         std::cout << "Wrong pixel value at " << inIt.GetIndex() << " of " << inIt.Get() << std::endl;
         failed = true;
@@ -166,12 +163,14 @@ int itkBinShrinkImageFilterTest1( int , char *[] )
   sourceImage->SetRegions( region );
   sourceImage->Allocate();
 
-  outIt =  itk::ImageRegionIteratorWithIndex<ImageType>(sourceImage, region);
+  {
+  itk::ImageRegionIteratorWithIndex<ImageType> outIt(sourceImage, region);
   for ( outIt.GoToBegin(); !outIt.IsAtEnd(); ++outIt )
     {
     // we multiply by ten for more precision
     outIt.Set( outIt.GetIndex()[0]*10 );
     }
+  }
   monitor1->SetInput( sourceImage );
 
   try
@@ -186,7 +185,7 @@ int itkBinShrinkImageFilterTest1( int , char *[] )
     itk::ImageRegionConstIteratorWithIndex<ImageType> inIt( monitor2->GetOutput(), monitor2->GetOutput()->GetLargestPossibleRegion() );
     for (inIt.GoToBegin(); !inIt.IsAtEnd(); ++inIt)
       {
-      if (inIt.Get() != (inIt.GetIndex()[0]*factors[0] )*10 - 5 )
+      if (inIt.Get() != (inIt.GetIndex()[0]*factors[0] )*10 + 5 )
         {
         std::cout << "Wrong pixel value at " << inIt.GetIndex() << " of " << inIt.Get() << std::endl;
         failed = true;
@@ -211,7 +210,7 @@ int itkBinShrinkImageFilterTest1( int , char *[] )
     itk::ImageRegionConstIteratorWithIndex<ImageType> inIt( monitor2->GetOutput(), monitor2->GetOutput()->GetLargestPossibleRegion() );
     for (inIt.GoToBegin(); !inIt.IsAtEnd(); ++inIt)
       {
-      if (inIt.Get() != (inIt.GetIndex()[0]*factors[0] )*10 )
+      if (inIt.Get() != (inIt.GetIndex()[0]*factors[0]+1 )*10 )
         {
         std::cout << "Wrong pixel value at " << inIt.GetIndex() << " of " << inIt.Get() << std::endl;
         failed = true;
@@ -224,10 +223,18 @@ int itkBinShrinkImageFilterTest1( int , char *[] )
     failed = true;
     }
 
+  index[0] = 0;
+  index[1] = 3;
+  region.SetIndex( index );
+
   for (unsigned int shrink = 1; shrink < 12; ++shrink)
     {
+     // update with 3,1 shrink factor
+    unsigned int factors[2] = { 1, shrink };
+    std::cout << "== Testing with shrink factors " << factors[0] << " " << factors[1] << " == " << std::endl;
+
     for (unsigned int x = 1; x < 10; ++x )
-      for (unsigned int y = 1; y < 10; ++y )
+      for (unsigned int y = 2*shrink; y < 20; ++y )
         {
         // fill in an image
         size[0] = x;
@@ -236,6 +243,7 @@ int itkBinShrinkImageFilterTest1( int , char *[] )
         sourceImage->SetRegions( region );
         sourceImage->Allocate();
 
+        std::cout << "--Resolution " << x << " " << y << "--" << std::endl;
 
         itk::ImageRegionIteratorWithIndex<ImageType> outIt(sourceImage, region);
         for ( outIt.GoToBegin(); !outIt.IsAtEnd(); ++outIt )
@@ -246,21 +254,28 @@ int itkBinShrinkImageFilterTest1( int , char *[] )
 
         try
           {
-          // update with 3,1 shrink factor
-          unsigned int factors[2] = { 1, shrink };
-          std::cout << "== Testing with shrink factors " << factors[0] << " " << factors[1] << " == " << std::endl;
           bin->SetShrinkFactors(factors);
           monitor2->UpdateLargestPossibleRegion();
-          std::cout << "----------------check------------------\n";
           // check values
           itk::ImageRegionConstIteratorWithIndex<ImageType> inIt( monitor2->GetOutput(), monitor2->GetOutput()->GetLargestPossibleRegion() );
+          bool lfailed = false;
           for (inIt.GoToBegin(); !inIt.IsAtEnd(); ++inIt)
             {
-            if (inIt.Get() != inIt.GetIndex()[0]*10 )
+            int expectedValue = inIt.GetIndex()[0]*10;
+            if (inIt.Get() != expectedValue )
               {
-              std::cout << "Wrong pixel value at " << inIt.GetIndex() << " of " << inIt.Get() << std::endl;
-              failed = true;
+              if (!lfailed)
+                {
+                std::cout << "--Resolution " << x << " " << y << "--" << std::endl;
+                }
+              std::cout << "Wrong pixel value at " << inIt.GetIndex() << " of " << inIt.Get() << ", expected: " << expectedValue << std::endl;
+              lfailed = failed = true;
               }
+            }
+          if (lfailed)
+            {
+            monitor2->GetOutput()->Print(std::cout);
+            exit(1);
             }
           }
         catch (itk::ExceptionObject &e)
