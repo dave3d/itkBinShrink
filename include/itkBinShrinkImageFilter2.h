@@ -18,26 +18,53 @@
 #ifndef __itkBinShrinkImageFilter2_h
 #define __itkBinShrinkImageFilter2_h
 
-#include "itkBinShrinkImageFilter.h"
+#include "itkShrinkImageFilter.h"
+
+#if ITK_VERSION_MAJOR < 4
+#define ThreadIdType int
+#endif
+
 
 namespace itk
 {
 
 /** \class BinShrinkImageFilter2
+ * \brief Reduce the size of an image by an integer factor in each
+ * dimension.
  *
- * This is a differnent algorithm for performance comparison.
+ * BinShrinkImageFilter2 reduces the size of an image by an integer factor
+ * in each dimension. The algorithm implemented is a mean or box
+ * filter subsample.
+ *
+ * The output image size in each dimension is given by:
+ *
+ * outputSize[j] = max( vcl_floor(inputSize[j]/shrinkFactor[j]), 1 );
+ *
+ * NOTE: The physical centers of the input and output will be the
+ * same. Because of this, the Origin of the output may not be the same
+ * as the Origin of the input.
+ * Since this filter produces an image which is a different
+ * resolution, origin and with different pixel spacing than its input
+ * image, it needs to override several of the methods defined
+ * in ProcessObject in order to properly manage the pipeline execution model.
+ * In particular, this filter overrides
+ * ProcessObject::GenerateInputRequestedRegion() and
+ * ProcessObject::GenerateOutputInformation().
+ *
+ * This filter is implemented as a multithreaded filter.  It provides a
+ * ThreadedGenerateData() method for its implementation.
  *
  * \ingroup ITKBinShrink
  * \ingroup Streamed
  */
 template <class TInputImage, class TOutputImage>
 class ITK_EXPORT BinShrinkImageFilter2:
-    public BinShrinkImageFilter<TInputImage,TOutputImage>
+    public ShrinkImageFilter<TInputImage,TOutputImage>
 {
 public:
   /** Standard class typedefs. */
   typedef BinShrinkImageFilter2                          Self;
-  typedef BinShrinkImageFilter<TInputImage,TOutputImage>   Superclass;
+  typedef ShrinkImageFilter<TInputImage,TOutputImage>   Superclass;
   typedef SmartPointer<Self>                            Pointer;
   typedef SmartPointer<const Self>                      ConstPointer;
 
@@ -45,7 +72,7 @@ public:
   itkNewMacro(Self);
 
   /** Run-time type information (and related methods). */
-  itkTypeMacro(BinShrinkImageFilter2, BinShrinkImageFilter);
+  itkTypeMacro(BinShrinkImageFilter2, ShrinkImageFilter);
 
   /** Typedef to images */
   typedef TOutputImage                                OutputImageType;
@@ -67,6 +94,13 @@ public:
   itkStaticConstMacro(OutputImageDimension, unsigned int,
                       TOutputImage::ImageDimension );
 
+  /** BinShrinkImageFilter2 needs a larger input requested region than the output
+   * requested region.  As such, BinShrinkImageFilter2 needs to provide an
+   * implementation for GenerateInputRequestedRegion() in order to inform the
+   * pipeline execution model.
+   * \sa ProcessObject::GenerateInputRequestedRegion() */
+  virtual void GenerateInputRequestedRegion();
+
 
 #ifdef ITK_USE_CONCEPT_CHECKING
   /** Begin concept checking */
@@ -81,7 +115,7 @@ protected:
   BinShrinkImageFilter2();
   ~BinShrinkImageFilter2() {};
 
-  /** BinShrinkImageFilter can be implemented as a multithreaded filter.
+  /** BinShrinkImageFilter2 can be implemented as a multithreaded filter.
    * Therefore, this implementation provides a ThreadedGenerateData() routine
    * which is called for each processing thread. The output image data is
    * allocated automatically by the superclass prior to calling
