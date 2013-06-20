@@ -23,7 +23,7 @@
 
 #include "itkTimeProbe.h"
 
-int itkBinShrinkPerformanceTest( int argc, char *argv[] )
+int itkBinShrinkPerformanceTest( int , char *argv[] )
 {
 
 const unsigned int shrinkFactor = 4;
