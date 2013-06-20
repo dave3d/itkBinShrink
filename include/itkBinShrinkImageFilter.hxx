@@ -281,8 +281,6 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
   if ( !inputPtr->GetLargestPossibleRegion().IsInside( inputRequestedRegion.GetIndex() ) ||
        !inputPtr->GetLargestPossibleRegion().IsInside( inputRequestedRegion.GetUpperIndex() ) )
     {
-    std::cout << "Inputs Region: " << inputPtr->GetLargestPossibleRegion() << std::endl;
-    std::cout << "RR: " << inputRequestedRegion << std::endl;
     itkExceptionMacro( "Unexpected error calculating RR");
     }
 
@@ -341,62 +339,19 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
 
     }
 
-inputPtr->TransformContinuousIndexToPhysicalPoint(inputIndexOutputOrigin, outputOrigin);
+  inputPtr->TransformContinuousIndexToPhysicalPoint(inputIndexOutputOrigin, outputOrigin);
 
-outputPtr->SetSpacing(outputSpacing);
-outputPtr->SetOrigin(outputOrigin);
+  outputPtr->SetSpacing(outputSpacing);
+  outputPtr->SetOrigin(outputOrigin);
 
-// Set region
-typename TOutputImage::RegionType outputLargestPossibleRegion;
-outputLargestPossibleRegion.SetSize(outputSize);
-outputLargestPossibleRegion.SetIndex(outputStartIndex);
+  // Set region
+  typename TOutputImage::RegionType outputLargestPossibleRegion;
+  outputLargestPossibleRegion.SetSize(outputSize);
+  outputLargestPossibleRegion.SetIndex(outputStartIndex);
 
-outputPtr->SetLargestPossibleRegion(outputLargestPossibleRegion);
+  outputPtr->SetLargestPossibleRegion(outputLargestPossibleRegion);
 
 }
-
-
-
-// /**
-//  *
-//  */
-// template <class TInputImage, class TOutputImage>
-// typename BinShrinkImageFilter<TInputImage,TOutputImage>::OutputOffsetType
-// BinShrinkImageFilter<TInputImage,TOutputImage>
-// ::ComputeOffsetIndex(void)
-// {
-//   // get pointers to the input and output
-//   InputImageConstPointer inputPtr  = this->GetInput();
-//   OutputImagePointer     outputPtr = this->GetOutput();
-
-//   assert( inputPtr && outputPtr );
-
-//   OutputIndexType           outputIndex;
-//   InputIndexType            inputIndex;
-//   OutputOffsetType          offsetIndex;
-
-//   typename TOutputImage::PointType tempPoint;
-
-
-//   // use this index to compute the offset everywhere in this class
-//   outputIndex = outputPtr->GetLargestPossibleRegion().GetIndex();
-//   inputIndex = inputPtr->GetLargestPossibleRegion().GetIndex();
-
-//   // We wish to perform the following mapping of outputIndex to
-//   // inputIndex on all points in our region
-//   outputPtr->TransformIndexToPhysicalPoint( outputIndex, tempPoint );
-//   inputPtr->TransformPhysicalPointToIndex( tempPoint, inputIndex );
-
-//   // Given that the size is scaled by a constant factor eq:
-//   // inputIndex = outputIndex * factorSize
-//   // is equivalent up to a fixed offset which we now compute
-//   for ( unsigned int i=0; i < TInputImage::ImageDimension; ++i )
-//     {
-//     offsetIndex[i] = inputIndex[i] - outputIndex[i]*this->GetShrinkFactors()[i];
-//     }
-
-//   return offsetIndex;
-// }
 
 } // end namespace itk
 
