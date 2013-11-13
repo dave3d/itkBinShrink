@@ -99,7 +99,7 @@ int itkBinShrinkExampleDispatch( const std::string &imageFileName,
 int itkBinShrinkExample( int argc, char *argv[] )
 {
 
-  if ( argc < 6 )
+  if ( argc < 3 )
   {
     std::cerr << "Missing arguments" << std::endl;
     std::cerr << "Usage: " << argv[0] << " InputImage OutputImage shrinkFactor" << std::endl;
@@ -117,7 +117,11 @@ int itkBinShrinkExample( int argc, char *argv[] )
     {
     itkGenericExceptionMacro( "Unable to determine ImageIO reader for \"" << infname << "\"" );
     }
+  iobase->SetFileName( infname );
+  iobase->ReadImageInformation();
 
+
+  std::cout << iobase << std::endl;
 
   const itk::ImageIOBase::IOComponentType componentType = iobase->GetComponentType();
   const itk::ImageIOBase::IOPixelType pixelType = iobase->GetPixelType();
