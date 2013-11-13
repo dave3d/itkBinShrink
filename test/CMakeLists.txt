@@ -4,8 +4,8 @@ itk_module_test()
 #changed when this module is renamed.
 
 set(ITK${itk-module}Tests
+  itkBinShrinkExample.cxx
   itkBinShrinkImageFilterTest1.cxx
-  itkBinShrinkImageFilter2Test1.cxx
   itkBinShrinkImageFilterTest2.cxx
   itkBinShrinkPerformanceTest.cxx
 )
@@ -19,5 +19,5 @@ itk_add_test(NAME itkBinShrinkImageFilterTest1
 itk_add_test(NAME itkBinShrinkImageFilter2Test1
   COMMAND ${itk-module}TestDriver  itkBinShrinkImageFilter2Test1 )
 
-itk_add_test(NAME itkBinShrinkImageFilterTest2 
+itk_add_test(NAME itkBinShrinkImageFilterTest2
   COMMAND ${itk-module}TestDriver  itkBinShrinkImageFilterTest2 )
