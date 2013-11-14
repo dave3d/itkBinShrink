@@ -7,7 +7,6 @@ set(ITK${itk-module}Tests
   itkBinShrinkExample.cxx
   itkBinShrinkImageFilterTest1.cxx
   itkBinShrinkImageFilterTest2.cxx
-  itkBinShrinkPerformanceTest.cxx
 )
 
 CreateTestDriver(${itk-module}  "${${itk-module}-Test_LIBRARIES}" "${ITK${itk-module}Tests}")
