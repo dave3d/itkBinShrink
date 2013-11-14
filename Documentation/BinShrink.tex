@@ -10,11 +10,12 @@
 \usepackage[dvips,
 bookmarks,
 bookmarksopen,
+float,
 backref,
 colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},
 ]{hyperref}
 
-\title{The BinShrinkFilter: A multi-resolution filter with efficient averaging. }
+\title{BinShrink: A multi-resolution filter with cache efficient averaging. }
 
 \newcommand{\IJhandlerIDnumber}{0}
 
@@ -60,7 +61,14 @@ colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},
 % scope of the document.
 \begin{abstract}
 \noindent
-This document describes a new algorithm not currently in itk\cite{ITKSoftwareGuide}. 
+We present a new filter for the Insight Toolkit (ITK), to reduce the
+resolution of an image by integer factor while averging call
+\textit{BinShrink}. This filter provides a new levels of performance to
+ITK for reducing resolution and noise present in an image. The filter
+support streaming, multi-threading and most of ITK's pixel types
+including scalars, \textit{Vector}s,
+\textit{SymmetricSecondRankTensor}s, and \textit{RGBPixel}s.
+
 \end{abstract}
 
 \IJhandlenote{\IJhandlerIDnumber}
@@ -74,9 +82,18 @@ artifacts such as spots. However, observations performed with our open source
 telescope have revealed the presence of such spots. The spots seems to continuously change positions on the solar surface. 
 
 
+% don't like
+This ``binning'' algorithm is commonly used in processing of high
+resolution electron microscopy image. It's available in such packages
+as The Boulder Laboratory for 3-D Electron Microscopy of Cell's
+IMOD\cite{IMOD}, \cite{bsoft2007}. 
 Multi-resolution
 
 why is this fitlter useful?
+
+
+This document describes a new algorithm not currently in
+itk\cite{ITKSoftwareGuide}. 
 
 \section{Implementation}
 
@@ -86,27 +103,45 @@ Features
 
 \subsection{Geometry}
 
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{images/pixelgrid}
+  \itkcaption{Grid Geometry}
+  \label{fig:PixelGrid}
+\end{figure}
+
 \subsection{Optimization}
 Optimization 
 
 
 \section{Results}
 
-Lets look as some image.
+To view the output of this filter we have used a synthetic function
+created by Marschner and Lobb\cite{MarschnerL94}, along with additive
+noise to create volume. This function has been used previously to
+evaluate volume rendering reconstruction filters. We have rendered
+into a 128 pixel cubic volume such that the majority of the frequencies in
+the function are sampled just above 4 times the Nyquist frequency. This makes
+for challenging theoretical data set when the shrinking factor is also
+4.
 
-\subsection{Performance}
+The code used to generate these images was written in Python with
+SimpleITK. The original Marshner-Lobb volume was normalized with the 
+\textit{Normalize} filter so that the volume had a mean
+of 0 and a standard deviation of 1. Then Gaussian distributed random
+noise was added with a 0 mean and a sigma to achieve the targeted
+signal to noise ratio. After the shrinking operation was performed,
+the volume was again normalized for contrast. Then the center slice
+was extracted and tiles. Lastly it was colorized by the
+\textit{ScalarToRGBColormap} filter\cite{Tustison2009}.
 
-\section{Conclusion}
-
-trade offs 
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%  Example on how to insert a figure
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+We have composed a study for \textit{BinShrink} filter by varying the
+signal to noise ratio and shrinking by 2 and 4 (See figure
+\ref{fig:BinShrinkComparison}). Also for comparison we have used the
+\textit{SmoothingRecusiveGaissian} filter in conjunction with the
+\textit{Shrink} filter where \textit{sigma} used to define the
+smoothing Gaussian kernel is 0.7 times the shrink factor. 
 
 \begin{figure}
   \centering
@@ -125,6 +160,51 @@ trade offs
     interpolator and an optimizer.}
   \label{fig:GaussianShrinkComparison}
 \end{figure}
+
+\subsection{Performance}
+
+To analyze the performance of our bin shrink methods we compare them
+against similar process which can be done in ITK with two filters.
+
+By running a \textit{Mean} filter followed by a \textit{Shrink} filter a
+close approximation to \textit{BinShrink} can be done. The
+\textit{Mean} filter runs a average for each input pixel's
+neighborhood in a brute force fashion. This wastes computation on input
+pixel that are just dropped by the \textit{Shrink} filter.
+
+Using a Gaussian kernel to reduce aliasing is an alternative to the box
+kernel implicitly used with the \textit{BinShrink} filter. This can be
+done with constant time independent of the size of the Gaussian with
+the \textit{SmoothingRecusiveGaussian} filter.
+
+
+We generated a Gaussian distributed 256 pixel cubic image for
+performance evaluation. Utilizing SimpleITK and Python's
+\textit{timeit} module, we report the median of 3 runs for each
+algorithm across varying shrink factors (See Figure
+\ref{fig:ShrinkPerformance}). The system... As expected the \textit{Mean} approach
+suffers from exponential cost while the
+\textit{SmoothingRecursiveGaussian} method remains constant. While the
+\textit{BinShrink2} implementation only touches each input pixel once,
+it also suffers from exponential growth likely due to it's memory
+access pattern being inefficient and not cache coherent. On the other
+hand the \textit{BinShrink} implementation execution time decreases as
+the shrink factor increases.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{images/shrink_time}
+  \itkcaption{Performance}
+  \label{fig:ShrinkPerformance}
+\end{figure}
+
+\section{Conclusion}
+
+
+
+
+%  Example 
+
 
 
 To support shape-guidance, the generic level set equation
