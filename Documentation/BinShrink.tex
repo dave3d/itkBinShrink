@@ -97,19 +97,50 @@ itk\cite{ITKSoftwareGuide}.
 
 \section{Implementation}
 
-Algorithm
+The algorithm implmentated in the \textit{BinShrink} filter can be
+described with (Eqn (\ref{eqn:Algo})) for the 2D case. 
+\begin{equation}
+\label{eqn:Algo}
+\mathsf{I}_{out}(x_o,x_1) = \frac{\sum_{i=0}^{f_0}\sum_{j=0}^{f_1}\mathsf{I}_{in}(f_0 x_o+i,f_1 x_1+j)}{f_0 f_1}
+\end{equation}
 
-Features
+The output image is only defined when all the required input image
+pixels are defined. The vector variable $\mathbf{\overline{f}}$ is a user defined
+shrink factor.
+
+The method operates on a local input and output region making the
+filter appropriate for streaming. Also the only operations required are
+pixel wise addition and division by a scalar, so that it can readily
+work with a wide variety of pixel types.
 
 \subsection{Geometry}
 
+The geometry of an image includes it's pixel spacing, origin, and
+image orientation. There is not change in the orientation but the
+spacing is scaled by the shrink factor. However, there is some
+complication when defining the origin. When the input image size is
+not evenly dividable by the shrinking factors a choice on how to
+``round'' the pixels location needs to be made. We have chosen to maintain the physical
+location for the image signal and truncate the odd pixels at the
+boundaries. As ITK image can non-zero starting induces, we define that
+the output origin pixel must lay on the same lower boundary as the
+input, and the origin must be adjusted accordingly (See figure \ref{fig:PixelGrid}).
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.8\linewidth]{images/pixelgrid}
-  \itkcaption{Grid Geometry}
+  \includegraphics[width=0.4\linewidth]{images/pixelgrid}
+  \itkcaption{This represents the change in geometry from a 5x5 image
+    binned by a factor of 22. The green dotted lines is the input
+    image. The yellow grid is the result of the filter. The points
+    represent the respective origins.}
   \label{fig:PixelGrid}
 \end{figure}
+
+While this approach maintains the physical location of the image
+signal to does not maintain the full extent of the image nor the
+center. Therefore for algorithms such an image pyramids or certain
+neuro-imaging analysis, this method may not be appropriate or it
+needs to be ensured that the input is divisible by the shrink factor.
 
 \subsection{Optimization}
 Optimization 
