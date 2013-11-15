@@ -130,23 +130,24 @@ The output image is only defined when all the required input image
 pixels are defined. The vector variable $\mathbf{\overline{f}}$ is a user defined
 shrink factor.
 
-The method operates on a local input and output region making the
+The method operates only on local input and output regions making the
 filter appropriate for streaming. Also the only operations required are
-pixel wise addition and division by a scalar, so that it can readily
+pixel wise addition and division by a scalar, so the filter can readily
 work with a wide variety of pixel types.
 
 \subsection{Geometry}
 
-The geometry of an image includes it's pixel spacing, origin, and
-image orientation. For this filter there is no change in the orientation but the
-spacing is scaled by the shrink factor. However, there is some
-complication when defining the origin. When the input image size is
-not evenly dividable by the shrinking factors a choice on how to
-``round'' the pixels location needs to be made. We have chosen to maintain the physical
+The geometry of an image includes its pixel spacing, origin, and
+image orientation. For the BinShrink filter the orientation is 
+unchanged from the input image to the output image, but the output 
+image's spacing is scaled from the input spacing by the shrink factor.
+Also, there is some complication when defining the origin. When the input image size is
+not evenly divisible by the shrinking factor, a choice on how to
+``round'' the pixel locations needs to be made. We have chosen to maintain the physical
 location for the image signal and truncate the odd pixels at the
-boundaries. As ITK image can have non-zero starting indexes, we define
-the output origin pixel must lay on the same lower boundary as the
-input, and the origin must be adjusted accordingly (See figure \ref{fig:PixelGrid}).
+boundaries. As an ITK image can have non-zero starting indexes, we define
+that the output origin pixel must lay on the same lower boundary as the
+input, and therefore the origin must be adjusted accordingly (See figure \ref{fig:PixelGrid}).
 
 \begin{figure}
   \centering
@@ -159,19 +160,19 @@ input, and the origin must be adjusted accordingly (See figure \ref{fig:PixelGri
 \end{figure}
 
 While this approach maintains the physical location of the image
-signal to does not maintain neither the full extent nor the
+signal, it does not maintain either the full extent or the
 center of the image. Therefore for algorithms such an image pyramids or certain
-neuro-imaging analysis, this method may not be appropriate or
+neuro-imaging analysis, this method may not be appropriate, or
 insurances need to be made such that the input size is divisible by the shrink factor.
 
 \subsection{Initial Implementation}
 
-We have inlcuded the initial implementation of the filter in the
-submittion for performance comparison purposes and have named it
+We have included the initial implementation of the filter in the
+submission for performance comparison purposes and have named it
 \textit{BinShrink2}. The above description of geometry applies only to the
 \textit{BinShrink} filter. The original \textit{BinShrink2} was
 derived from ITK's \textit{Shrink} filter, which has different
-geomentry then described above. The original \textit{BinShrink2}
+geometry characteristics than described above. The original \textit{BinShrink2}
 follows the same geometry as the \textit{Shrink} filter.
 
 This original implementation used ITK's conventional
@@ -210,11 +211,11 @@ The implementation we suggest for inclusion in ITK is the
 above and is not derived from the \textit{ShrinkFilter}. The initial
 implementation accesses the memory in an incoherent fashion based on
 the input neighborhood. However, it is faster to access memory in a
-linear and coherent fashion. This lead to the goal of accessing the
-input image on a per scan-line basis, and operating the
-averaging on scan-lines as opposed to pixels. By utilizing ITK's
+linear and coherent fashion. Therefore we designed BinShrink 
+to access the input image on a per scan-line basis and to operate the
+averaging on whole scan-lines as opposed to individual pixels. By utilizing ITK's
 \textit{ScanlineIteators}, we improved the algorithm to work on a
-scan-lines for the inner most loops (See Listing \ref{lst:01}).
+scan-line for the inner most loops (See Listing \ref{lst:01}).
 
 \begin{lstlisting}[label=lst:02, caption={A selection of code from the
   \textit{BinShrink} filter demonstrating scan-line averaging.}]
