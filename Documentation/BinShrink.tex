@@ -321,7 +321,7 @@ performance evaluation. We set the number of threads used to be
 16. Utilizing SimpleITK and Python's
 \textit{timeit} module, we report the median of 3 runs for each
 algorithm across varying shrink factors (See Figure
-\ref{fig:ShrinkPerformance}).  The image size, the number of threads,
+\ref{fig:ShrinkPerformance} and Table \ref{tab:ShrinkPerformance}).  The image size, the number of threads,
 and the shrink factors were carefully chosen such that the output
 image was always evenly divided for multi-threading. As expected the
 \textit{Mean} approach suffers from exponential cost as a function of
@@ -336,7 +336,9 @@ the shrink factor increases.
 \begin{figure}
   \centering
   \includegraphics[width=0.8\linewidth]{images/shrink_time}
-  \itkcaption{Performance}
+  \itkcaption{The execution time of the \textif{BinShrink} filter
+    compared to the orignal \textif{BinShrink2} implementation and
+    other shrinking approaches.}
   \label{fig:ShrinkPerformance}
 \end{figure}
 
@@ -351,19 +353,21 @@ BinShrink2 &    0.0862 & 0.0465 & 0.0714 & 0.0797 & 0.0940 & 0.1217 & 0.7451\\
 GaussianShrink &0.4850 & 0.4779 & 0.4778 & 0.4803 & 0.4791 & 0.4752 & 0.4767\\
 MeanShrink &    0.7440 & 3.9093 & 3.9264 & 12.818 & 31.602 & 121.80 & 1412.3\\
 \end{tabular}
-\itkcaption{Performance In seconds...}
+\itkcaption{The execution time in seconds of algorithms verses various
+shrink factors.}
 \label{tab:ShrinkPerformance}
 \end{center}
 \end{table}
 
 This is quite the interesting case for analyzing the difference
-between the \textit{BinShrink} and \textit{BinShrink2}. TODO after
-final numbers...
+between the \textit{BinShrink} and \textit{BinShrink2}.
 
 \section{Conclusion}
 
 We have demonstrated that the \textit{BinShrink} filter is a fast
-filter to be used for multi-resolutional work. Based on the resulting
+filter to be used for multi-resolutional work. We have also shown that
+by coherently accessing images in a scanline fashion can improve
+performance by 10X. Based on the resulting
 images, it may not always be the best methods for image quality as it
 may result in aliasing. However, features such as wide pixel type
 support and streaming make it quite practical for working with large
