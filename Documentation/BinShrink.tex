@@ -61,11 +61,11 @@ colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},
 % scope of the document.
 \begin{abstract}
 \noindent
-We present a new filter for the Insight Toolkit (ITK), to reduce the
-resolution of an image by integer factor while averging call
-\textit{BinShrink}. This filter provides a new levels of performance to
+We present a new filter for the Insight Toolkit (ITK) for reducing the
+resolution of an image by an integer factor while averaging called
+\textit{BinShrink}. This filter provides a new level of performance to
 ITK for reducing resolution and noise present in an image. The filter
-support streaming, multi-threading and most of ITK's pixel types
+supports streaming, multi-threading and most of ITK's pixel types
 including scalars, \textit{Vector}s,
 \textit{SymmetricSecondRankTensor}s, and \textit{RGBPixel}s.
 
@@ -89,11 +89,11 @@ as The Boulder Laboratory for 3-D Electron Microscopy of Cell's
 IMOD\cite{IMOD}, \cite{bsoft2007}. 
 Multi-resolution
 
-why is this fitlter useful?
+Why is this filter useful?
 
 
 This document describes a new algorithm not currently in
-itk\cite{ITKSoftwareGuide}. 
+ITK\cite{ITKSoftwareGuide}. 
 
 \section{Implementation}
 
@@ -117,13 +117,13 @@ Optimization
 
 \section{Results}
 
-To view the output of this filter we have used a synthetic function
+To test our BinShrink filter we have used a synthetic function
 created by Marschner and Lobb\cite{MarschnerL94}, along with additive
-noise to create volume. This function has been used previously to
-evaluate volume rendering reconstruction filters. We have rendered
+noise to create test volume images. This function is often used to
+evaluate volume rendering reconstruction filters. We have rendered it
 into a 128 pixel cubic volume such that the majority of the frequencies in
-the function are sampled just above 4 times the Nyquist frequency. This makes
-for challenging theoretical data set when the shrinking factor is also
+the function are sampled just above 4 times the Nyquist frequency. Such an image
+makes for a challenging theoretical data set when the shrinking factor is also
 4.
 
 The code used to generate these images was written in Python with
@@ -133,15 +133,18 @@ of 0 and a standard deviation of 1. Then Gaussian distributed random
 noise was added with a 0 mean and a sigma to achieve the targeted
 signal to noise ratio. After the shrinking operation was performed,
 the volume was again normalized for contrast. Then the center slice
-was extracted and tiles. Lastly it was colorized by the
+was extracted and tiled. Finally it was colorized by the
 \textit{ScalarToRGBColormap} filter\cite{Tustison2009}.
 
-We have composed a study for \textit{BinShrink} filter by varying the
-signal to noise ratio and shrinking by 2 and 4 (See figure
-\ref{fig:BinShrinkComparison}). Also for comparison we have used the
+We examined the results of the \textit{BinShrink} filter by varying the
+signal to noise ratio in our Marshnel-Lobb test image and then shrinking those noisy
+images by factors of 2 and 4 (See figure
+\ref{fig:BinShrinkComparison}). For comparison we also used the
 \textit{SmoothingRecusiveGaissian} filter in conjunction with the
-\textit{Shrink} filter where \textit{sigma} used to define the
-smoothing Gaussian kernel is 0.7 times the shrink factor. 
+\textit{Shrink} filter on the same test noisy images.  We set \textit{sigma} of the
+smoothing Gaussian kernel at 0.7 times the shrink factor. 
+
+[NEED TO TALK ABOUT ALIASING AND IMAGE QUALITY, SINCE IT'S MENTIONED IN THE CONCLUSION]
 
 \begin{figure}
   \centering
@@ -163,18 +166,18 @@ smoothing Gaussian kernel is 0.7 times the shrink factor.
 
 \subsection{Performance}
 
-To analyze the performance of our bin shrink methods we compare them
-against similar processes which can be done in ITK with two filters.
+To analyze the performance of our bin shrinking methods we compare them
+against similar processes which can be performed in ITK with other pairs of filters.
 
-By running a \textit{Mean} filter followed by a \textit{Shrink} filter a
-close approximation to \textit{BinShrink} can be performed. The
-\textit{Mean} filter runs a average for each input pixel's
-neighborhood in a brute force fashion. This wastes computation on input
-pixel that are just dropped by the \textit{Shrink} filter.
+Running a \textit{Mean} filter followed by a \textit{Shrink} filter is a
+close approximation to \textit{BinShrink}. The
+\textit{Mean} filter computes an average for each input pixel's
+neighborhood in a brute force fashion. This approach wastes computation on input
+pixels that are dropped by the \textit{Shrink} filter.
 
 Using a Gaussian kernel to reduce aliasing is an alternative to the box
-kernel implicitly used with the \textit{BinShrink} filter. This can be
-done in constant time and independent of the size of the Gaussian with
+kernel implicitly used with the \textit{BinShrink} filter. Gaussian filtering can be
+performed in constant time and independent of the size of the Gaussian with
 the \textit{SmoothingRecusiveGaussian} filter.
 
 We generated a 384 pixel cubic image of Gaussian distributed noise for
@@ -185,10 +188,11 @@ algorithm across varying shrink factors (See Figure
 \ref{fig:ShrinkPerformance}).  The image size, the number of threads,
 and the shrink factors were carefully chosen such that the output
 image was always evenly divided for multi-threading. As expected the
-\textit{Mean} approach suffers from exponential cost while the
-\textit{SmoothingRecursiveGaussian} method remains constant. While the
+\textit{Mean} approach suffers from exponential cost as a function of
+shrink size, while the
+\textit{SmoothingRecursiveGaussian} method remains constant. The
 \textit{BinShrink2} implementation only touches each input pixel once,
-it also suffers from exponential growth likely due to it's memory
+but it also suffers from exponential growth likely due to its memory
 access pattern being inefficient and not cache coherent. On the other
 hand the \textit{BinShrink} implementation execution time decreases as
 the shrink factor increases.
@@ -207,9 +211,9 @@ final numbers...
 \section{Conclusion}
 
 We have demonstrated that the \textit{BinShrink} filter is a fast
-filter to be used for multi-resolution work. Based on the resulting
-images, it may not always be the best methods of image quality as it
-may result in aliasing. However, the features such as wide pixel type
+filter to be used for multi-resolutional work. Based on the resulting
+images, it may not always be the best methods for image quality as it
+may result in aliasing. However, features such as wide pixel type
 support and streaming make it quite practical for working with large
 data sets.
 
