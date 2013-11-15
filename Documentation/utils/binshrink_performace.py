@@ -6,8 +6,18 @@ import math
 from timeit import Timer
 import matplotlib.pyplot as plt
 
+import os
 
-sz = [256]*3
+num_threads = int(os.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'])
+sz = [128*3]*3
+t_repeat = 3
+t_number = 1
+factors = [f for f in range(2, 34) if sz[-1]%(f*num_threads)==0]
+
+print "Using factors:", factors
+
+
+
 
 n = np.random.normal(0, scale=1.0, size=sz).astype(np.float32)
 img = sitk.GetImageFromArray(n)
@@ -28,9 +38,6 @@ def my_mean(img,shrink):
     r = (shrink+1)//2
     return sitk.Shrink(sitk.Mean(img, [r]*3), [shrink]*3)
 
-t_repeat = 3
-t_number = 1
-factors = [2,3,4,6,8,12,16,24,32]
 #factors = [2,4,8]
 med_times1 = []
 
@@ -57,6 +64,7 @@ for factor in factors:
 print "Timing mean..."
 med_times4 = []
 for factor in factors:
+    print "computing mean with factor", factor
     timer = Timer( lambda: my_mean(img, factor) )
     times = timer.repeat( repeat=t_repeat, number= t_number )
     med_times4.append(np.median(times) )
