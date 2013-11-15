@@ -6,14 +6,34 @@
 \documentclass{InsightArticle}
 
 \usepackage[dvips]{graphicx}
+\usepackage{listings}
 %  hyperref should be the last package to be loaded.
 \usepackage[dvips,
 bookmarks,
 bookmarksopen,
-float,
 backref,
 colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},
 ]{hyperref}
+
+\lstset{ %
+language=C++,                % choose the language of the code
+basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+numbers=left,                   % where to put the line-numbers
+numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+stepnumber=1,                   % the step between two line-numbers. If it is 1 each line will be numbered
+numbersep=5pt,                  % how far the line-numbers are from the code
+backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+frame=single,           % adds a frame around the code
+tabsize=2,          % sets default tabsize to 2 spaces
+captionpos=b,           % sets the caption-position to bottom
+breaklines=true,        % sets automatic line breaking
+breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
+escapeinside={\%*}{*)}          % if you want to add a comment within your code
+}
+
 
 \title{BinShrink: A multi-resolution filter with cache efficient averaging. }
 
@@ -32,7 +52,7 @@ colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},
 % Add hyperlink to the web location and license of the paper.
 % The argument of this command is the handler identifier given
 % by the Insight Journal to this paper.
-% 
+%
 \IJhandlefooter{\IJhandlerIDnumber}
 
 
@@ -40,7 +60,7 @@ colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},
 \else
    %
    % Commands for including Graphics when using latex
-   % 
+   %
    \DeclareGraphicsExtensions{.eps,.jpg,.gif,.tiff,.bmp,.png}
    \DeclareGraphicsRule{.jpg}{eps}{.jpg.bb}{`convert #1 eps:-}
    \DeclareGraphicsRule{.gif}{eps}{.gif.bb}{`convert #1 eps:-}
@@ -75,30 +95,23 @@ including scalars, \textit{Vector}s,
 
 \tableofcontents
 
-Using filters from the Insight Toolkit, we develop an algorithm for detecting
-and tracking thje movement of solar spots. As it is widely known, celestial
-objects such as the sun are ethereal and perfect, and therefore can not harbor
-artifacts such as spots. However, observations performed with our open source
-telescope have revealed the presence of such spots. The spots seems to continuously change positions on the solar surface. 
-
-
 % don't like
 This ``binning'' algorithm is commonly used in processing of high
 resolution electron microscopy image. It's available in such packages
 as The Boulder Laboratory for 3-D Electron Microscopy of Cell's
-IMOD\cite{IMOD}, \cite{bsoft2007}. 
+IMOD\cite{IMOD}, \cite{bsoft2007}.
 Multi-resolution
 
 Why is this filter useful?
 
 
 This document describes a new algorithm not currently in
-ITK\cite{ITKSoftwareGuide}. 
+ITK\cite{ITKSoftwareGuide}.
 
 \section{Implementation}
 
 The algorithm implmentated in the \textit{BinShrink} filter can be
-described with (Eqn (\ref{eqn:Algo})) for the 2D case. 
+described with (Eqn (\ref{eqn:Algo})) for the 2D case.
 \begin{equation}
 \label{eqn:Algo}
 \mathsf{I}_{out}(x_o,x_1) = \frac{\sum_{i=0}^{f_0}\sum_{j=0}^{f_1}\mathsf{I}_{in}(f_0 x_o+i,f_1 x_1+j)}{f_0 f_1}
@@ -116,13 +129,13 @@ work with a wide variety of pixel types.
 \subsection{Geometry}
 
 The geometry of an image includes it's pixel spacing, origin, and
-image orientation. There is not change in the orientation but the
+image orientation. For this filter there is no change in the orientation but the
 spacing is scaled by the shrink factor. However, there is some
 complication when defining the origin. When the input image size is
 not evenly dividable by the shrinking factors a choice on how to
 ``round'' the pixels location needs to be made. We have chosen to maintain the physical
 location for the image signal and truncate the odd pixels at the
-boundaries. As ITK image can non-zero starting induces, we define that
+boundaries. As ITK image can have non-zero starting indexes, we define
 the output origin pixel must lay on the same lower boundary as the
 input, and the origin must be adjusted accordingly (See figure \ref{fig:PixelGrid}).
 
@@ -130,21 +143,103 @@ input, and the origin must be adjusted accordingly (See figure \ref{fig:PixelGri
   \centering
   \includegraphics[width=0.4\linewidth]{images/pixelgrid}
   \itkcaption{This represents the change in geometry from a 5x5 image
-    binned by a factor of 22. The green dotted lines is the input
+    binned by a factor of 2x2. The green dotted lines is the input
     image. The yellow grid is the result of the filter. The points
     represent the respective origins.}
   \label{fig:PixelGrid}
 \end{figure}
 
 While this approach maintains the physical location of the image
-signal to does not maintain the full extent of the image nor the
-center. Therefore for algorithms such an image pyramids or certain
-neuro-imaging analysis, this method may not be appropriate or it
-needs to be ensured that the input is divisible by the shrink factor.
+signal to does not maintain neither the full extent nor the
+center of the image. Therefore for algorithms such an image pyramids or certain
+neuro-imaging analysis, this method may not be appropriate or
+insurances need to be made such that the input size is divisible by the shrink factor.
+
+\subsection{Initial Implementation}
+
+We have inlcuded the initial implementation of the filter in the
+submittion for performance comparison purposes and have named it
+\textit{BinShrink2}. The above description of geometry applies only to the
+\textit{BinShrink} filter. The original \textit{BinShrink2} was
+derived from ITK's \textit{Shrink} filter, which has different
+geomentry then described above. The original \textit{BinShrink2}
+follows the same geometry as the \textit{Shrink} filter.
+
+This original implementation used ITK's conventional
+\textit{NeighborhoodIterator} to average the input for each output
+(See Listing \ref{lst:01}).
+
+\begin{lstlisting}[label=lst:01, caption={A selected section of code
+      from \textit{BinShrink2} filter using the neighborhood iterator.}]
+while ( !outIt.IsAtEnd() )
+  {
+  outputIndex = outIt.GetIndex();
+
+  inputIndex = outputIndex * factorSize + offsetIndex;
+
+  inputIt.SetLocation( inputIndex );
+
+  AccumulatePixelType sum = NumericTraits<AccumulatePixelType>::Zero;
+  typename ConstNeighborhoodIteratorType::ConstIterator ci = inputIt.Begin();
+
+  for (ci.GoToBegin(); !ci.IsAtEnd(); ++ci)
+    {
+    sum += AccumulatePixelType( ci.Get() );
+    }
+  sum = sum / double( inputIt.GetActiveIndexListSize() );
+
+  outIt.Set( sum );
+  ++outIt;
+  }
+\end{lstlisting}
+
 
 \subsection{Optimization}
-Optimization 
 
+The implementation we suggest for inclusion in ITK is the
+\textit{BinShrink}, which follows the geomentry specifically described
+above and is not derived from the \textit{ShrinkFilter}. The initial
+implementation accesses the memory in an incoherent fashion based on
+the input neighborhood. However, it is faster to access memory in a
+linear and coherent fashion. This lead to the goal of accessing the
+input image on a per scan-line basis, and operating the
+averaging on scan-lines as opposed to pixels. By utilizing ITK's
+\textit{ScanlineIteators}, we improved the algorithm to work on a
+scan-lines for the inner most loops (See Listing \ref{lst:01}).
+
+\begin{lstlisting}[label=lst:02, caption={A selection of code from the
+  \textit{BinShrink} filter demonstrating scan-line averaging.}]
+while ( !outputIterator.IsAtEnd() )
+  {
+  const OutputIndexType outputIndex = outputIterator.GetIndex();
+
+  typename std::vector<OutputOffsetType>::const\_iterator offset = offsets.begin();
+  const InputIndexType startInputIndex = outputIndex * factorSize;
+
+  while ( ++offset != offsets.end() )
+    {
+    inputIterator.SetIndex( startInputIndex+*offset );
+
+    for( size\_t i = 0; i < ln; ++i )
+      {
+      for( size\_t j = 0; j < factorSize[0]; ++j)
+        {
+        accBuffer[i] += inputIterator.Get();
+        ++inputIterator;
+        }
+      }
+    }
+
+    for ( size\_t j = 0; j <ln;++j)
+    {
+      accBuffer[j] = accBuffer[j] * inumSamples;
+      outputIterator.Set( static\_cast<OutputPixelType>(accBuffer[j]) );
+      ++outputIterator;
+    }
+
+    outputIterator.NextLine();
+  }
+\end{lstlisting}
 
 \section{Results}
 
@@ -158,7 +253,7 @@ makes for a challenging theoretical data set when the shrinking factor is also
 4.
 
 The code used to generate these images was written in Python with
-SimpleITK. The original Marshner-Lobb volume was normalized with the 
+SimpleITK. The original Marshner-Lobb volume was normalized with the
 \textit{Normalize} filter so that the volume had a mean
 of 0 and a standard deviation of 1. Then Gaussian distributed random
 noise was added with a 0 mean and a sigma to achieve the targeted
@@ -173,7 +268,7 @@ images by factors of 2 and 4 (See figure
 \ref{fig:BinShrinkComparison}). For comparison we also used the
 \textit{SmoothingRecusiveGaissian} filter in conjunction with the
 \textit{Shrink} filter on the same test noisy images.  We set \textit{sigma} of the
-smoothing Gaussian kernel at 0.7 times the shrink factor. 
+smoothing Gaussian kernel at 0.7 times the shrink factor.
 
 [NEED TO TALK ABOUT ALIASING AND IMAGE QUALITY, SINCE IT'S MENTIONED IN THE CONCLUSION]
 
@@ -270,4 +365,3 @@ data sets.
 
 
 \end{document}
-
