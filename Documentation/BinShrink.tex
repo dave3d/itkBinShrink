@@ -200,6 +200,22 @@ the shrink factor increases.
   \label{fig:ShrinkPerformance}
 \end{figure}
 
+\begin{table}
+\begin{center}
+\begin{tabular}{l|*{7}{c}r}
+Algorithm & \multicolumn{7}{c}{Shrink Factor} \\
+  &            2 & 3 & 4 & 6 & 8 & 12 & 24 \\
+\hline
+BinShrink &     0.0149s & 0.0116s & 0.0118s & 0.0113s & 0.0112s & 0.0113s & 0.0110s\\
+BinShrink2 &    0.0862s & 0.0465s & 0.0714s & 0.0797s & 0.0940s & 0.1217s & 0.7451s\\
+GaussianShrink &0.4850s & 0.4779s & 0.4778s & 0.4803s & 0.4791s & 0.4752s & 0.4767s\\
+MeanShrink &    0.7440s & 3.9093s & 3.9264s & 12.818s & 31.602s & 121.80s & 1412.3s\\
+\end{tabular}
+\itkcaption{Performance}
+\label{tab:ShrinkPerformance}
+\end{center}
+\end{table}
+
 This is quite the interesting case for analyzing the difference
 between the \textit{BinShrink} and \textit{BinShrink2}. TODO after
 final numbers...
