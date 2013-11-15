@@ -87,7 +87,9 @@ resolution of an image by an integer factor while averaging called
 ITK for reducing resolution and noise present in an image. The filter
 supports streaming, multi-threading and most of ITK's pixel types
 including scalars, \textit{Vector}s,
-\textit{SymmetricSecondRankTensor}s, and \textit{RGBPixel}s.
+\textit{SymmetricSecondRankTensor}s, and \textit{RGBPixel}s. The
+filter has been optimized it efficiently access the input image thereby
+greatly increasing performance over conventional methods.
 
 \end{abstract}
 
@@ -95,18 +97,25 @@ including scalars, \textit{Vector}s,
 
 \tableofcontents
 
-% don't like
+Our new \textif{BinShrink} filter reduces the resolution of an input
+image by a integer shrinking factor, while performing averaging of an
+input neighborhood. It can be used in streaming processing to reduce a
+the of an image that is larger the main memory. The averaging can
+effectively reduce uncorrelated noise by reducing the expected
+standard deviation by a factor $1/\sqrt{n}$, based on the Bienaymé
+formula \ref[TODO].
+
+Electron microscopy  pushes the limits of resolution and detectable
+signals sometimes having less the a 1:4 signal to noise ratio.
 This ``binning'' algorithm is commonly used in processing of high
 resolution electron microscopy image. It's available in such packages
 as The Boulder Laboratory for 3-D Electron Microscopy of Cell's
-IMOD\cite{IMOD}, \cite{bsoft2007}.
-Multi-resolution
+IMOD\cite{IMOD}, BSoft \cite{bsoft2007}.
 
-Why is this filter useful?
-
-
-This document describes a new algorithm not currently in
-ITK\cite{ITKSoftwareGuide}.
+In this paper we demostrate the effective perfomace improvements which
+can be gain by changing the way an algorthim accesses the data. We
+demostrate that by accessing the data is a coherent scan-line order
+that over a 10X speedup can be achived in some cases.
 
 \section{Implementation}
 
