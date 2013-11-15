@@ -280,25 +280,36 @@ images by factors of 2 and 4 (See figure
 \textit{Shrink} filter on the same test noisy images.  We set \textit{sigma} of the
 smoothing Gaussian kernel at 0.7 times the shrink factor.
 
-[NEED TO TALK ABOUT ALIASING AND IMAGE QUALITY, SINCE IT'S MENTIONED IN THE CONCLUSION]
-
 \begin{figure}
   \centering
   \includegraphics[width=0.4\linewidth]{images/binshrink_hot.png}
-  \caption[Registration Framework Components]{The basic components of the
-    registration framework are two input images, a transform, a metric, an
-    interpolator and an optimizer.}
+  \caption{Outputs of the \textit{BinShrink} fitlter on a
+    Marchner-Lobb function with additive Gaussian noise. The (Left)
+    column is the original image, the (Center) column is binned
+    by 2, and the (Right) column is binned by 4. The signal to
+    noise ratio varies by row with the values 100:1, 2:1, 1:1, 1:2,
+    and 1:4, respectfully.}
   \label{fig:BinShrinkComparison}
 \end{figure}
 
 \begin{figure}
   \centering
   \includegraphics[width=0.4\linewidth]{images/gaussianshrink_hot.png}
-  \caption[Registration Framework Components]{The basic components of the
-    registration framework are two input images, a transform, a metric, an
-    interpolator and an optimizer.}
+  \caption{Outputs of the \textit{SmoothingRecusiveGaussian} and
+    \textit{Shrink} filters on a Marchner-Lobb function with additive
+    Gaussian noise. The (Left) column is the original image, the
+    (Center) column is smooth with a sigma of 1.4 and shrunk by 2, and
+    the (Right) colum is smoothed by 2.8 and shrunk 4. The signal to
+    noise ratio varies by row with the values 100:1, 2:1, 1:1, 1:2,
+    and 1:4, respectfully.}
   \label{fig:GaussianShrinkComparison}
 \end{figure}
+
+The comparison of the effect filtering with Gaussian version a box
+(See Figure \ref{fig:BinShrinkComparison} verses
+\ref{fig:GaussianShrinkComparison}}) is quite revealing of the
+aliasing which can be caused by using a box filter. This is most
+clearly evident with the signal to noise ratio of 100:1.
 
 \subsection{Performance}
 
@@ -336,8 +347,8 @@ the shrink factor increases.
 \begin{figure}
   \centering
   \includegraphics[width=0.8\linewidth]{images/shrink_time}
-  \itkcaption{The execution time of the \textif{BinShrink} filter
-    compared to the orignal \textif{BinShrink2} implementation and
+  \itkcaption{The execution time of the \textit{BinShrink} filter
+    compared to the orignal \textit{BinShrink2} implementation and
     other shrinking approaches.}
   \label{fig:ShrinkPerformance}
 \end{figure}
@@ -360,14 +371,25 @@ shrink factors.}
 \end{table}
 
 This is quite the interesting case for analyzing the difference
-between the \textit{BinShrink} and \textit{BinShrink2}.
+between the \textit{BinShrink} and \textit{BinShrink2}. Both these
+filters access the number number of input pixels and output pixels to
+perform the same computation. The difference it the type of iterator
+used and the order in which the images are accessed. The differences
+in the iterator should be accounted for in with the time difference
+with a shrink factor of 2. However, the large increase in the
+\textit{BinShrink2} execution times can not be explained by the
+differents in the iterator operation costs. Specifically our
+performance results indicate that for a shrink factor of 24 the
+\textit{BinShrink} is 67X faster. We conjecture that this is
+due to the inefficient memory access patern with the neighborhoods
+causing decreased cache hits.
 
 \section{Conclusion}
 
 We have demonstrated that the \textit{BinShrink} filter is a fast
 filter to be used for multi-resolutional work. We have also shown that
-by coherently accessing images in a scanline fashion can improve
-performance by 10X. Based on the resulting
+by coherently accessing images in scan-line order the performance can
+be improved by 10X. Based on the resulting
 images, it may not always be the best methods for image quality as it
 may result in aliasing. However, features such as wide pixel type
 support and streaming make it quite practical for working with large
