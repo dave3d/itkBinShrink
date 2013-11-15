@@ -56,7 +56,7 @@ ax2.set_yticklabels([])
 #ax2.tick_params( bottom='off', top='off', left='off', right='off' )
 
 # draw a dot
-plot(1.,1., marker='o', markerfacecolor=color2, markersize=8)
+plot(1.,1., marker='o', markerfacecolor=color2, markersize=10)
 
 #show()
 savefig('pixelgrid.eps')
