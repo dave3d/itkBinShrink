@@ -164,26 +164,28 @@ smoothing Gaussian kernel is 0.7 times the shrink factor.
 \subsection{Performance}
 
 To analyze the performance of our bin shrink methods we compare them
-against similar process which can be done in ITK with two filters.
+against similar processes which can be done in ITK with two filters.
 
 By running a \textit{Mean} filter followed by a \textit{Shrink} filter a
-close approximation to \textit{BinShrink} can be done. The
+close approximation to \textit{BinShrink} can be performed. The
 \textit{Mean} filter runs a average for each input pixel's
 neighborhood in a brute force fashion. This wastes computation on input
 pixel that are just dropped by the \textit{Shrink} filter.
 
 Using a Gaussian kernel to reduce aliasing is an alternative to the box
 kernel implicitly used with the \textit{BinShrink} filter. This can be
-done with constant time independent of the size of the Gaussian with
+done in constant time and independent of the size of the Gaussian with
 the \textit{SmoothingRecusiveGaussian} filter.
 
-
-We generated a Gaussian distributed 256 pixel cubic image for
-performance evaluation. Utilizing SimpleITK and Python's
+We generated a 384 pixel cubic image of Gaussian distributed noise for
+performance evaluation. We set the number of threads used to be
+16. Utilizing SimpleITK and Python's
 \textit{timeit} module, we report the median of 3 runs for each
 algorithm across varying shrink factors (See Figure
-\ref{fig:ShrinkPerformance}). The system... As expected the \textit{Mean} approach
-suffers from exponential cost while the
+\ref{fig:ShrinkPerformance}).  The image size, the number of threads,
+and the shrink factors were carefully chosen such that the output
+image was always evenly divided for multi-threading. As expected the
+\textit{Mean} approach suffers from exponential cost while the
 \textit{SmoothingRecursiveGaussian} method remains constant. While the
 \textit{BinShrink2} implementation only touches each input pixel once,
 it also suffers from exponential growth likely due to it's memory
@@ -198,32 +200,19 @@ the shrink factor increases.
   \label{fig:ShrinkPerformance}
 \end{figure}
 
+This is quite the interesting case for analyzing the difference
+between the \textit{BinShrink} and \textit{BinShrink2}. TODO after
+final numbers...
+
 \section{Conclusion}
 
+We have demonstrated that the \textit{BinShrink} filter is a fast
+filter to be used for multi-resolution work. Based on the resulting
+images, it may not always be the best methods of image quality as it
+may result in aliasing. However, the features such as wide pixel type
+support and streaming make it quite practical for working with large
+data sets.
 
-
-
-%  Example 
-
-
-
-To support shape-guidance, the generic level set equation
-(Eqn(~\ref{eqn:ShapeInfluenceTerm})) is extended to incorporate a shape guidance
-term:
-
-\begin{equation}
-\label{eqn:ShapeInfluenceTerm}
-\xi \left(\psi^{*}(\mathbf{x}) - \psi(\mathbf{x})\right)
-\end{equation}
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%  Insert the bibliography using BibTeX
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \bibliographystyle{plain}
 \bibliography{BinShrink}
