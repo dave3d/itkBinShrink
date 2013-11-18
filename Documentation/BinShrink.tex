@@ -103,7 +103,7 @@ input neighborhood. It can be used in streaming processing to reduce a
 the of an image that is larger the main memory. The averaging can
 effectively reduce uncorrelated noise by reducing the expected
 standard deviation by a factor $1/\sqrt{n}$, based on the Bienaymé
-formula \ref[TODO].
+formula.
 
 Electron microscopy  pushes the limits of resolution and detectable
 signal sometimes having less a 1:4 signal to noise ratio.
@@ -373,7 +373,7 @@ shrink factors.}
 \end{center}
 \end{table}
 
-Analyzing the difference in performance between the \textit{BinShrink} 
+Analyzing the difference in performance between the \textit{BinShrink}
 and \textit{BinShrink2} filters is quite interesting. Both these
 filters access the same number of input pixels and output pixels to
 perform the same computation. The difference between them is the type of iterator
@@ -384,7 +384,7 @@ for a shrink factor of 2. However, the large increase in the
 difference in the iterator operation costs. Specifically our
 performance results indicate that for a shrink factor of 24 the
 \textit{BinShrink} is 67X faster. We conjecture that this disparity is
-due to \textit{BinShrink}'s inefficient memory access pattern 
+due to \textit{BinShrink}'s inefficient memory access pattern
 causing decreased cache hits.
 
 \section{Conclusion}
@@ -392,7 +392,7 @@ causing decreased cache hits.
 We have demonstrated that the \textit{BinShrink} filter is a fast
 filter for multi-resolutional work. We have also shown that
 by coherently accessing images in scan-line order the performance can
-be improved by a factor of 10. 
+be improved by a factor of 10.
 \textit{BinShrink} may not always be the best method for image quality as it
 may result in aliasing. However, features such as wide pixel type
 support and streaming make it quite practical for working with large
