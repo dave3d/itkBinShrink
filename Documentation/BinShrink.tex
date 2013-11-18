@@ -88,7 +88,7 @@ ITK for reducing resolution and noise present in an image. The filter
 supports streaming, multi-threading and most of ITK's pixel types
 including scalars, \textit{Vector}s,
 \textit{SymmetricSecondRankTensor}s, and \textit{RGBPixel}s. The
-filter has been optimized it efficiently access the input image thereby
+filter has been optimized to efficiently access the input image thereby
 greatly increasing performance over conventional methods.
 
 \end{abstract}
@@ -138,8 +138,8 @@ work with a wide variety of pixel types.
 \subsection{Geometry}
 
 The geometry of an image includes its pixel spacing, origin, and
-image orientation. For the BinShrink filter the orientation is 
-unchanged from the input image to the output image, but the output 
+image orientation. For the BinShrink filter the orientation is
+unchanged from the input image to the output image, but the output
 image's spacing is scaled from the input spacing by the shrink factor.
 Also, there is some complication when defining the origin. When the input image size is
 not evenly divisible by the shrinking factor, a choice on how to
@@ -211,7 +211,7 @@ The implementation we suggest for inclusion in ITK is the
 above and is not derived from the \textit{ShrinkFilter}. The initial
 implementation accesses the memory in an incoherent fashion based on
 the input neighborhood. However, it is faster to access memory in a
-linear and coherent fashion. Therefore we designed BinShrink 
+linear and coherent fashion. Therefore we designed BinShrink
 to access the input image on a per scan-line basis and to operate the
 averaging on whole scan-lines as opposed to individual pixels. By utilizing ITK's
 \textit{ScanlineIteators}, we improved the algorithm to work on a
@@ -306,8 +306,8 @@ smoothing Gaussian kernel at 0.7 times the shrink factor.
 \end{figure}
 
 The comparison of filtering with a Gaussian kernel the mean to the box kernel
-implicitly done by the \textit{BinShrink} 
- is quite revealing of the 
+implicitly done by the \textit{BinShrink}
+ is quite revealing of the
 aliasing which can be caused by using a box filter (See Figure
 \ref{fig:BinShrinkComparison} verses
 \ref{fig:GaussianShrinkComparison}). This is most
@@ -372,15 +372,15 @@ shrink factors.}
 \end{center}
 \end{table}
 
-This is quite the interesting case for analyzing the difference
+This is quite an interesting case for analyzing the difference
 between the \textit{BinShrink} and \textit{BinShrink2}. Both these
-filters access the number number of input pixels and output pixels to
-perform the same computation. The difference it the type of iterator
-used and the order in which the images are accessed. The differences
-in the iterator should be accounted for in with the time difference
-with a shrink factor of 2. However, the large increase in the
+filters access the same number of input pixels and output pixels to
+perform the same computation. The difference is the type of iterator
+used and the order in which the pixels are accessed. The differences
+in the iterator should be accounted for with the time difference
+for a shrink factor of 2. However, the large increase in the
 \textit{BinShrink2} execution times can not be explained by the
-differents in the iterator operation costs. Specifically our
+differences in the iterator operation costs. Specifically our
 performance results indicate that for a shrink factor of 24 the
 \textit{BinShrink} is 67X faster. We conjecture that this is
 due to the inefficient memory access patern with the neighborhoods
@@ -389,7 +389,7 @@ causing decreased cache hits.
 \section{Conclusion}
 
 We have demonstrated that the \textit{BinShrink} filter is a fast
-filter to be used for multi-resolutional work. We have also shown that
+filter to be used for multi-resolutional work. We have shown that
 by coherently accessing images in scan-line order the performance can
 be improved by 10X. Based on the resulting
 images, it may not always be the best methods for image quality as it
